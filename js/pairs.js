@@ -19,8 +19,8 @@ var PairsGame = (function() {
     var active = false;
     var grid = [];
     var gridSize = 4;
-    var timeLimit = 0; // 0 = infinite
-    var maxAttempts = 0; // 0 = infinite
+    var timeLimit = 120; // 0 = infinite
+    var maxAttempts = 16; // 0 = infinite
     var timeRemaining = 0;
     var attempts = 0;
     var matchedPairs = 0;
@@ -173,6 +173,11 @@ var PairsGame = (function() {
             canClick = false;
             attempts++;
             updateAttempts();
+
+            if (maxAttempts > 0 && attempts >= maxAttempts) {
+                endGame(false);
+                return;
+            }
             
             if (firstCard.card.id === secondCard.card.id) {
                 firstCard.card.matched = true;
@@ -241,10 +246,33 @@ var PairsGame = (function() {
 
     function startGame(config) {
         console.log('[Pairs] Starting game', config);
+
+        function getConfigNumber(keys, defaultValue) {
+            var i;
+            var rawValue;
+
+            for (i = 0; i < keys.length; i++) {
+                if (config && config[keys[i]] !== undefined && config[keys[i]] !== null) {
+                    rawValue = config[keys[i]];
+                    break;
+                }
+            }
+
+            if (rawValue === undefined) {
+                return defaultValue;
+            }
+
+            var parsed = Number(rawValue);
+            if (!isFinite(parsed) || parsed < 0) {
+                return defaultValue;
+            }
+
+            return parsed;
+        }
         
-        gridSize = (config && config.gridSize) ? config.gridSize : 4;
-        timeLimit = (config && config.timeLimit) ? config.timeLimit : 0;
-        maxAttempts = (config && config.maxAttempts) ? config.maxAttempts : 0;
+        gridSize = Math.floor(getConfigNumber(['gridSize', 'grid_size'], 4)) || 4;
+        timeLimit = getConfigNumber(['timeLimit', 'time_limit'], 0);
+        maxAttempts = Math.floor(getConfigNumber(['maxAttempts', 'max_attempts', 'attemptLimit', 'attemptsLimit', 'maxTries'], 0));
         
         timeRemaining = timeLimit;
         attempts = 0;

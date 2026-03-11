@@ -28,7 +28,7 @@
         totalStages: 3,
         keysPerStage: 4,
         timeLimit: 10,
-        keyPool: ['W', 'A', 'S', 'D', 'Q', 'E']
+        keyPool: ['W', 'A', 'S', 'D', 'Q', 'E','F','G','H','J']
     };
 
     const keyCodeMap = {
@@ -43,9 +43,9 @@
         if (config) {
             sequenceConfig = {
                 totalStages: config.totalStages || 3,
-                keysPerStage: config.keysPerStage || 4,
+                keysPerStage: config.keysPerStage || 10,
                 timeLimit: config.timeLimit || 10,
-                keyPool: config.keyPool || ['W', 'A', 'S', 'D', 'Q', 'E']
+                keyPool: config.keyPool || ['W', 'A', 'S', 'D', 'Q', 'E','F','G','H','J']
             };
         }
         
