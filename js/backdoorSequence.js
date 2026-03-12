@@ -44,8 +44,8 @@
             sequenceConfig = {
                 totalStages: config.totalStages || 3,
                 keysPerStage: config.keysPerStage || 10,
-                timeLimit: config.timeLimit || 10,
-                keyPool: config.keyPool || ['W', 'A', 'S', 'D', 'Q', 'E','F','G','H','J']
+                timeLimit: config.timeLimit || 5,
+                keyPool: config.keyPool || ['W', 'A', 'S', 'D', 'E','F','G','H','J']
             };
         }
         
