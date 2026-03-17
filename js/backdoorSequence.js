@@ -43,7 +43,7 @@
         if (config) {
             sequenceConfig = {
                 totalStages: config.totalStages || 3,
-                keysPerStage: config.keysPerStage || 10,
+                keysPerStage: config.keysPerStage || 8,
                 timeLimit: config.timeLimit || 5,
                 keyPool: config.keyPool || ['W', 'A', 'S', 'D', 'E','F','G','H','J']
             };
