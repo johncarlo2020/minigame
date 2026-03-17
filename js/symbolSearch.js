@@ -28,7 +28,7 @@ const symbolSearchState = {
         gridSize: 8,
         shiftInterval: 1000,
         timeLimit: 15000,
-        minKeyLength: 1,
+        minKeyLength: 3,
         maxKeyLength: 3,
         symbolType: 'symbols',
         symbols: SYMBOL_PRESETS.symbols
