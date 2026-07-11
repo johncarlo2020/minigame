@@ -16,8 +16,8 @@
 
 const numberedSequenceGameState = {
     config: {
-        gridSize: 4,
-        sequenceLength: 6,
+        gridSize: 8,
+        sequenceLength: 8,
         rounds: 3,
         showTime: 4000,
         guessTime: 10000,
