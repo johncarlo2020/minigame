@@ -1462,6 +1462,21 @@ body, html {
     100% { transform: translateX(0); }
 }
 
+@keyframes numberedSequenceBlink {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(0.96);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+.numbered-sequence-square.blinking {
+    animation: numberedSequenceBlink 0.8s ease-in-out infinite;
+}
+
 /* ===== NUMBERED SEQUENCE GAME STYLES ===== */
 
 .numbered-sequence-display {

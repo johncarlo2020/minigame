@@ -36,17 +36,17 @@ const numberedSequenceGameState = {
     guessTimer: null
 };
 
+let blinkInterval = null;
+
 function startNumberedSequenceGame(config = {}) {
     if (typeof $ === 'undefined') {
-        console.error('jQuery is not available!');
         return;
     }
-    
+
     if ($('#numbered-sequence-container').length === 0) {
-        console.error('Numbered sequence container not found!');
         return;
     }
-    
+
     if (numberedSequenceGameState.timerInterval) {
         clearInterval(numberedSequenceGameState.timerInterval);
         numberedSequenceGameState.timerInterval = null;
@@ -59,7 +59,7 @@ function startNumberedSequenceGame(config = {}) {
         clearTimeout(numberedSequenceGameState.guessTimer);
         numberedSequenceGameState.guessTimer = null;
     }
-    
+
     numberedSequenceGameState.config = { ...numberedSequenceGameState.config, ...config };
     numberedSequenceGameState.currentRound = 0;
     numberedSequenceGameState.wrongPresses = 0;
@@ -69,17 +69,17 @@ function startNumberedSequenceGame(config = {}) {
     numberedSequenceGameState.numberedSquares = [];
     numberedSequenceGameState.playerSequence = [];
     numberedSequenceGameState.currentExpectedNumber = 1;
-    
+
     const container = $('#numbered-sequence-container');
     container.removeClass('active').addClass('active');
     container.css('display', 'flex');
     container.show();
-    
+
     $('.numbered-sequence-grid').hide();
     $('.numbered-sequence-splash').show();
-    
+
     updateNumberedSequenceUI();
-    
+
     setTimeout(() => {
         $('.numbered-sequence-splash').fadeOut(400, () => {
             initializeNumberedSequenceGrid();
@@ -99,7 +99,7 @@ function updateNumberedSequenceUI() {
 function initializeNumberedSequenceGrid() {
     const gridContainer = $('.numbered-sequence-grid');
     gridContainer.empty();
-    
+
     const gridSize = numberedSequenceGameState.config.gridSize;
     gridContainer.css({
         'display': 'grid',
@@ -110,16 +110,16 @@ function initializeNumberedSequenceGrid() {
         'height': '400px',
         'margin': '0 auto'
     });
-    
+
     for (let i = 0; i < gridSize * gridSize; i++) {
         const square = $('<div>')
             .addClass('numbered-sequence-square')
             .attr('data-index', i)
             .on('click', handleNumberedSequenceSquareClick);
-        
+
         gridContainer.append(square);
     }
-    
+
     numberedSequenceGameState.gameStarted = true;
 }
 
@@ -127,38 +127,38 @@ function startNumberedSequenceRound() {
     if (!numberedSequenceGameState.gameStarted) {
         return;
     }
-    
+
     numberedSequenceGameState.showingPattern = true;
     numberedSequenceGameState.gameActive = false;
     numberedSequenceGameState.playerSequence = [];
     numberedSequenceGameState.currentExpectedNumber = 1;
     numberedSequenceGameState.wrongPresses = 0;
-    
+
     $('.numbered-sequence-square').removeClass('lit selected correct wrong').text('');
-    
+
     generateNumberedSequence();
-    
+
     displayNumberedPattern();
-    
+
     updateNumberedSequenceUI();
     $('#numbered-sequence-message').text('Memorize the numbered sequence');
-    
+
     let remainingTime = numberedSequenceGameState.config.showTime;
     updateNumberedSequenceTimer(remainingTime);
-    
+
     numberedSequenceGameState.showTimer = setTimeout(() => {
         hideNumbersStartGame();
     }, numberedSequenceGameState.config.showTime);
-    
+
     numberedSequenceGameState.timerInterval = setInterval(() => {
         remainingTime -= 100;
-        
+
         if (remainingTime < 0) {
             remainingTime = 0;
         }
-        
+
         updateNumberedSequenceTimer(remainingTime);
-        
+
         if (remainingTime <= 0) {
             clearInterval(numberedSequenceGameState.timerInterval);
             numberedSequenceGameState.timerInterval = null;
@@ -170,37 +170,37 @@ function restartCurrentRound() {
     if (!numberedSequenceGameState.gameStarted) {
         return;
     }
-    
+
     numberedSequenceGameState.showingPattern = true;
     numberedSequenceGameState.gameActive = false;
     numberedSequenceGameState.playerSequence = [];
     numberedSequenceGameState.currentExpectedNumber = 1;
-    
+
     $('.numbered-sequence-square').removeClass('lit selected correct wrong').text('');
-    
+
     generateNumberedSequence();
-    
+
     displayNumberedPattern();
-    
+
     updateNumberedSequenceUI();
     $('#numbered-sequence-message').text('Memorize the numbered sequence');
-    
+
     let remainingTime = numberedSequenceGameState.config.showTime;
     updateNumberedSequenceTimer(remainingTime);
-    
+
     numberedSequenceGameState.showTimer = setTimeout(() => {
         hideNumbersStartGame();
     }, numberedSequenceGameState.config.showTime);
-    
+
     numberedSequenceGameState.timerInterval = setInterval(() => {
         remainingTime -= 100;
-        
+
         if (remainingTime < 0) {
             remainingTime = 0;
         }
-        
+
         updateNumberedSequenceTimer(remainingTime);
-        
+
         if (remainingTime <= 0) {
             clearInterval(numberedSequenceGameState.timerInterval);
             numberedSequenceGameState.timerInterval = null;
@@ -211,15 +211,15 @@ function restartCurrentRound() {
 function generateNumberedSequence() {
     const totalSquares = numberedSequenceGameState.config.gridSize * numberedSequenceGameState.config.gridSize;
     const sequenceLength = Math.min(numberedSequenceGameState.config.sequenceLength, totalSquares);
-    
+
     numberedSequenceGameState.numberedSquares = [];
-    
-    const availableIndices = Array.from({length: totalSquares}, (_, i) => i);
-    
+
+    const availableIndices = Array.from({ length: totalSquares }, (_, i) => i);
+
     for (let i = 1; i <= sequenceLength; i++) {
         const randomIndex = Math.floor(Math.random() * availableIndices.length);
         const squareIndex = availableIndices.splice(randomIndex, 1)[0];
-        
+
         numberedSequenceGameState.numberedSquares.push({
             index: squareIndex,
             number: i
@@ -229,9 +229,20 @@ function generateNumberedSequence() {
 
 function displayNumberedPattern() {
     numberedSequenceGameState.numberedSquares.forEach(item => {
-        const square = $(`.numbered-sequence-square[data-index="${item.index}"]`);
-        square.addClass('lit').text(item.number);
+        $(`.numbered-sequence-square[data-index="${item.index}"]`)
+            .addClass('lit')
+            .text(item.number);
     });
+
+    $('.numbered-sequence-square.lit').each(function () {
+        $(this).css('opacity', Math.random() > 0.6 ? 1 : 0.0);
+    });
+
+    blinkInterval = setInterval(() => {
+        $('.numbered-sequence-square.lit').each(function () {
+            $(this).css('opacity', Math.random() > 0.5 ? 1 : 0.0);
+        });
+    }, 650);
 }
 
 function updateNumberedSequenceTimer(timeMs) {
@@ -242,35 +253,44 @@ function updateNumberedSequenceTimer(timeMs) {
 }
 
 function hideNumbersStartGame() {
+    if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+    }
+
+    $('.numbered-sequence-square')
+        .css('opacity', 1)
+        .text('');
+
     numberedSequenceGameState.showingPattern = false;
     numberedSequenceGameState.gameActive = true;
-    
+
     $('.numbered-sequence-square').text('');
-    
+
     $('#numbered-sequence-message').text(`Click the squares in numerical order (1-${numberedSequenceGameState.config.sequenceLength})`);
-    
+
     if (numberedSequenceGameState.timerInterval) {
         clearInterval(numberedSequenceGameState.timerInterval);
         numberedSequenceGameState.timerInterval = null;
     }
-    
+
     $('.numbered-sequence-timer-progress').css('width', '0%');
     $('#numbered-sequence-timer').text('0.0');
-    
+
     startGuessTimer();
 }
 
 function startGuessTimer() {
     let remainingTime = numberedSequenceGameState.config.guessTime;
     updateNumberedSequenceTimer(remainingTime);
-    
+
     numberedSequenceGameState.guessTimer = setTimeout(() => {
         if (numberedSequenceGameState.gameActive) {
             if (numberedSequenceGameState.timerInterval) {
                 clearInterval(numberedSequenceGameState.timerInterval);
                 numberedSequenceGameState.timerInterval = null;
             }
-            
+
             numberedSequenceGameState.gameActive = false;
             numberedSequenceGameState.showingPattern = false;
             $('#numbered-sequence-message').text('Time\'s up! Game failed.');
@@ -280,16 +300,16 @@ function startGuessTimer() {
             }, 1500);
         }
     }, numberedSequenceGameState.config.guessTime);
-    
+
     numberedSequenceGameState.timerInterval = setInterval(() => {
         remainingTime -= 100;
-        
+
         if (remainingTime < 0) {
             remainingTime = 0;
         }
-        
+
         updateGuessTimer(remainingTime);
-        
+
         if (remainingTime <= 0) {
             clearInterval(numberedSequenceGameState.timerInterval);
             numberedSequenceGameState.timerInterval = null;
@@ -308,26 +328,25 @@ function handleNumberedSequenceSquareClick() {
     if (!numberedSequenceGameState.gameActive || numberedSequenceGameState.showingPattern) {
         return;
     }
-    
+
     const squareIndex = parseInt($(this).attr('data-index'));
-    
+
     const expectedSquare = numberedSequenceGameState.numberedSquares.find(
         item => item.number === numberedSequenceGameState.currentExpectedNumber
     );
-    
+
     if (!expectedSquare) {
-        console.error('No expected square found for number:', numberedSequenceGameState.currentExpectedNumber);
         return;
     }
-    
+
     $(this).addClass('selected');
-    
+
     if (squareIndex === expectedSquare.index) {
         playNumberedSequenceSound('click');
         $(this).addClass('correct');
         numberedSequenceGameState.playerSequence.push(squareIndex);
         numberedSequenceGameState.currentExpectedNumber++;
-        
+
         if (numberedSequenceGameState.currentExpectedNumber > numberedSequenceGameState.config.sequenceLength) {
             if (numberedSequenceGameState.guessTimer) {
                 clearTimeout(numberedSequenceGameState.guessTimer);
@@ -337,12 +356,12 @@ function handleNumberedSequenceSquareClick() {
                 clearInterval(numberedSequenceGameState.timerInterval);
                 numberedSequenceGameState.timerInterval = null;
             }
-            
+
             numberedSequenceGameState.currentRound++;
             numberedSequenceGameState.gameActive = false;
-            
+
             $('#numbered-sequence-message').text('Sequence completed correctly!');
-            
+
             if (numberedSequenceGameState.currentRound >= numberedSequenceGameState.config.rounds) {
                 setTimeout(() => {
                     endNumberedSequenceGame(true);
@@ -356,11 +375,11 @@ function handleNumberedSequenceSquareClick() {
     } else {
         $(this).addClass('wrong');
         numberedSequenceGameState.wrongPresses++;
-        
+
         playNumberedSequenceSound('penalty');
-        
+
         $('#numbered-sequence-message').text(`Wrong square! Expected number ${numberedSequenceGameState.currentExpectedNumber} (${numberedSequenceGameState.wrongPresses}/${numberedSequenceGameState.config.maxWrongPresses})`);
-        
+
         if (numberedSequenceGameState.wrongPresses >= numberedSequenceGameState.config.maxWrongPresses) {
             if (numberedSequenceGameState.guessTimer) {
                 clearTimeout(numberedSequenceGameState.guessTimer);
@@ -370,7 +389,7 @@ function handleNumberedSequenceSquareClick() {
                 clearInterval(numberedSequenceGameState.timerInterval);
                 numberedSequenceGameState.timerInterval = null;
             }
-            
+
             numberedSequenceGameState.gameActive = false;
             numberedSequenceGameState.showingPattern = false;
             $('#numbered-sequence-message').text('Too many wrong presses! Game failed.');
@@ -380,13 +399,13 @@ function handleNumberedSequenceSquareClick() {
             }, 1500);
             return;
         }
-        
+
         setTimeout(() => {
-            if (!numberedSequenceGameState.gameStarted || 
+            if (!numberedSequenceGameState.gameStarted ||
                 numberedSequenceGameState.wrongPresses >= numberedSequenceGameState.config.maxWrongPresses) {
                 return;
             }
-            
+
             if (numberedSequenceGameState.guessTimer) {
                 clearTimeout(numberedSequenceGameState.guessTimer);
                 numberedSequenceGameState.guessTimer = null;
@@ -395,14 +414,14 @@ function handleNumberedSequenceSquareClick() {
                 clearInterval(numberedSequenceGameState.timerInterval);
                 numberedSequenceGameState.timerInterval = null;
             }
-            
+
             $('.numbered-sequence-square').removeClass('selected correct wrong');
             numberedSequenceGameState.playerSequence = [];
             numberedSequenceGameState.currentExpectedNumber = 1;
             numberedSequenceGameState.gameActive = false;
-            
+
             setTimeout(() => {
-                if (numberedSequenceGameState.gameStarted && 
+                if (numberedSequenceGameState.gameStarted &&
                     numberedSequenceGameState.wrongPresses < numberedSequenceGameState.config.maxWrongPresses) {
                     restartCurrentRound();
                 }
@@ -415,11 +434,11 @@ function endNumberedSequenceGame(success) {
     if (!numberedSequenceGameState.gameStarted) {
         return;
     }
-    
+
     numberedSequenceGameState.gameActive = false;
     numberedSequenceGameState.showingPattern = false;
     numberedSequenceGameState.gameStarted = false;
-    
+
     if (numberedSequenceGameState.timerInterval) {
         clearInterval(numberedSequenceGameState.timerInterval);
         numberedSequenceGameState.timerInterval = null;
@@ -432,7 +451,7 @@ function endNumberedSequenceGame(success) {
         clearTimeout(numberedSequenceGameState.guessTimer);
         numberedSequenceGameState.guessTimer = null;
     }
-    
+
     if (success) {
         $('#numbered-sequence-message').text('Numbered sequence test completed successfully!');
         playNumberedSequenceSound('success');
@@ -443,7 +462,7 @@ function endNumberedSequenceGame(success) {
             playNumberedSequenceSound('failure');
         }
     }
-    
+
     setTimeout(() => {
         const container = $('#numbered-sequence-container');
         container.removeClass('active').hide();
@@ -457,8 +476,6 @@ function endNumberedSequenceGame(success) {
                     success: success
                 })
             });
-        } else {
-            console.log('Numbered sequence game result:', success);
         }
     }, 2000);
 }
@@ -481,13 +498,13 @@ function playNumberedSequenceSound(type) {
                 break;
             default:
                 audio = document.getElementById('sound-buttonPress');
-        }        
+        }
         if (audio) {
             audio.currentTime = 0;
-            audio.play().catch(() => {});
+            audio.play().catch(() => { });
         }
     } catch (e) {
-        
+
     }
 }
 

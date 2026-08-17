@@ -36,6 +36,7 @@ let requiredNotes = 20;
 let lastHitTime = 0;
 let missedNotes = 0;
 let maxMissedNotes = 3; // Default value
+let lastMoveTime = 0;
 
 // Timing windows in milliseconds
 const timingWindows = {
@@ -53,7 +54,7 @@ const scoreValues = {
 
 let rhythmConfig = {
     lanes: 4,
-    keys: ['A', 'S', 'D', 'F'],
+    keys: ['A', 'S', 'D', 'J', 'K', 'L'],
     noteSpeed: 300,
     noteSpawnRate: 1000,
     requiredNotes: 20,
@@ -146,37 +147,47 @@ function spawnNote() {
     updateProgressBar();
 }
 
-function moveNotes() {
+function moveNotes(timestamp) {
     if (!rhythmActive) return;
-    
-    const now = Date.now();
+
+    if (!lastMoveTime) {
+        lastMoveTime = timestamp;
+    }
+    const deltaTime = (timestamp - lastMoveTime) / 1000; // seconds elapsed
+    lastMoveTime = timestamp;
+
     const hitZonePos = $('.hit-zone').position().top;
-    const moveAmount = noteSpeed / 60; // this may cause issues down the line due to FPS differences
-    
+
     for (let i = rhythmNotes.length - 1; i >= 0; i--) {
         const note = rhythmNotes[i];
-        
+
         if (note.hit) continue;
-        
-        note.position += moveAmount;
+
+        // Move based on real elapsed time, not FPS
+        note.position += noteSpeed * deltaTime;
+
         note.element.css('top', note.position + 'px');
-        
+
         if (note.position > hitZonePos + 50) {
             showFeedback(note.lane, 'miss');
             breakCombo();
-            
+
             missedNotes++;
-            
-            $('#rhythm-message').text(`Missed ${missedNotes}/${maxMissedNotes} notes allowed`);
-            
+
+            $('#rhythm-message').text(
+                `Missed ${missedNotes}/${maxMissedNotes} notes allowed`
+            );
+
             if (missedNotes >= maxMissedNotes) {
                 stopRhythmGame(false);
             }
-            
+
             note.element.remove();
             rhythmNotes.splice(i, 1);
         }
     }
+
+    requestAnimationFrame(moveNotes);
 }
 
 function handleRhythmKeyPress(e) {
@@ -338,26 +349,27 @@ function resetRhythmGame() {
 }
 
 function startRhythmGame() {
-    rhythmActive = true;
-    
+    rhythmActive = false;
     buildRhythmUI();
-    
     resetRhythmGame();
-    
-    $('.rhythm-note').remove();
-    
-    spawnInterval = setInterval(spawnNote, noteSpawnRate);
-    moveInterval = setInterval(moveNotes, 1000 / 60); // this may cause issues down the line due to FPS differences
-    
-    document.addEventListener('keydown', handleRhythmKeyPress);
-    document.addEventListener('keyup', handleRhythmKeyRelease);
+    $('.rhythm-note').remove();    
+    setTimeout(() => { 
+        rhythmActive = true;
+
+        spawnInterval = setInterval(spawnNote, noteSpawnRate);
+        lastMoveTime = performance.now();
+        requestAnimationFrame(moveNotes);
+        
+        document.addEventListener('keydown', handleRhythmKeyPress);
+        document.addEventListener('keyup', handleRhythmKeyRelease);
+    }, 2000);    
 }
 
 function stopRhythmGame(success) {
     rhythmActive = false;
     
     clearInterval(spawnInterval);
-    clearInterval(moveInterval);
+    lastMoveTime = 0;
     
     document.removeEventListener('keydown', handleRhythmKeyPress);
     document.removeEventListener('keyup', handleRhythmKeyRelease);
